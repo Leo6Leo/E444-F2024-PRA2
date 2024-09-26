@@ -5,7 +5,7 @@ from flask_bootstrap import Bootstrap
 from flask_moment import Moment
 
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField
+from wtforms import StringField, SubmitField, EmailField
 from wtforms.validators import DataRequired
 
 app = Flask(__name__)
@@ -18,14 +18,23 @@ app.config['SECRET_KEY'] = 'the real secret key'
 @app.route('/', methods=['GET', 'POST'])
 def index():
     form = NameForm()
+    error = ""
     if form.validate_on_submit():
+        # First validate the email address is a UofT email
+        if not (form.email.data.endswith('@mail.utoronto.ca')) or (form.email.data.endswith('@utoronto.ca')):
+            flash('Please use your UofT email address')
+            error = "Please use your UofT email address"
+            return render_template('index.html',
+        form = NameForm(), name = session.get('name'), email = session.get('email'),error = error)
+
         old_name = session.get('name')
         if old_name is not None and old_name != form.name.data:
             flash('Looks like you have changed your name!')
         session['name'] = form.name.data
+        session['email'] = form.email.data
         return redirect(url_for('index'))
     return render_template('index.html',
-        form = form, name = session.get('name'))
+        form = form, name = session.get('name'), email = session.get('email'),error = error)
 
 
 @app.route("/user/<name>")
@@ -44,4 +53,5 @@ def internal_server_error(e):
 
 class NameForm(FlaskForm):
     name = StringField('What is your name?', validators=[DataRequired()])
+    email = EmailField('What is your UofT email?', validators=[DataRequired()])
     submit = SubmitField('Submit')
