@@ -55,3 +55,9 @@ class NameForm(FlaskForm):
     name = StringField('What is your name?', validators=[DataRequired()])
     email = EmailField('What is your UofT email?', validators=[DataRequired()])
     submit = SubmitField('Submit')
+
+
+
+if __name__ == '__main__':
+    # run the app on port 5001
+    app.run(host='0.0.0.0', port=5000)
